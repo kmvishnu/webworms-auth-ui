@@ -3,7 +3,7 @@ import { FieldError } from 'react-hook-form';
 
 interface InputFieldProps {
   id: string;
-  label: string;
+  label?: string;
   type: string;
   placeholder: string;
   register: any;
@@ -12,7 +12,6 @@ interface InputFieldProps {
 
 const InputField: React.FC<InputFieldProps> = ({
     id,
-    label,
     type,
     placeholder,
     register,
