@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import { useNavigate } from 'react-router-dom'; 
 import InputField from '../Common/InputField';
 import { useLogin } from '../../hooks/useLogin';
 import { COPYRIGHT, COPYRIGHT_URL } from '../../../config';
@@ -12,6 +13,8 @@ interface LoginFormInputs {
 }
 
 const LoginComponent: React.FC = () => {
+  const navigate = useNavigate();
+
   const validationSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email address').required('Email is required'),
     password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
@@ -32,12 +35,10 @@ const LoginComponent: React.FC = () => {
     login(data); 
   };
 
-
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">Login</h2>
-
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <InputField
@@ -74,13 +75,15 @@ const LoginComponent: React.FC = () => {
           </p>
         )}
 
-
         <div className="mt-4 text-center flex justify-between">
           <p className="text-sm text-gray-600">
             <span className="sm:block hidden">Don't have an account?{' '}</span>
-            <a href="/register" className="text-blue-500 hover:underline">
+            <button 
+              onClick={() => navigate('/register')} 
+              className="text-blue-500 hover:underline"
+            >
               Sign Up
-            </a>
+            </button>
           </p>
           <p className="text-sm text-gray-600">
             <a href="#" className="text-blue-500 hover:underline">
