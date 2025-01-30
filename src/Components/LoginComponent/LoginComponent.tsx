@@ -78,7 +78,7 @@ const LoginComponent: React.FC = () => {
         <div className="mt-4 text-center flex justify-between">
           <p className="text-sm text-gray-600">
             <span className="sm:block hidden">Don't have an account?{' '}</span>
-            <a href="#" className="text-blue-500 hover:underline">
+            <a href="/register" className="text-blue-500 hover:underline">
               Sign Up
             </a>
           </p>
