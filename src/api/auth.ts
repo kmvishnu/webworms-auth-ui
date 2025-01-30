@@ -6,6 +6,16 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface OtpRequest {
+  email: string;
+  purpose: "registration"|"forgotPassword";
+}
+
+export interface SendOtpResponse {
+  status: string;
+  message: string;
+}
+
 export interface LoginResponse {
   token: string;
   user: {
@@ -28,3 +38,9 @@ const api = axios.create({
     const response = await api.post<LoginResponse>('/login', data);
     return response.data;
   };
+
+  export const sendOtp = async (data: OtpRequest): Promise<SendOtpResponse> => {
+    const response = await api.post<SendOtpResponse>('/sendOtp', data);
+    return response.data;
+  };
+
