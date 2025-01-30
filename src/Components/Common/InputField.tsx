@@ -12,7 +12,6 @@ interface InputFieldProps {
 
 const InputField: React.FC<InputFieldProps> = ({
     id,
-    label,
     type,
     placeholder,
     register,
