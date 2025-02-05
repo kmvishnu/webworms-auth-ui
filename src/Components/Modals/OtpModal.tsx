@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useVerifyOtp } from "../../hooks/useOtp";
 import { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface OtpModalProps {
   email: string;
@@ -11,7 +12,9 @@ interface OtpModalProps {
 
 const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
   const [otp, setOtp] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
   const { mutate: verifyOtp, isPending, error, isError } = useVerifyOtp();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +27,11 @@ const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
       },
       {
         onSuccess: () => {
-          onClose();
+          setShowSuccess(true);
+          setTimeout(() => {
+            onClose();
+            navigate("/");
+          }, 2000);
         },
       }
     );
@@ -33,7 +40,6 @@ const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
   const getErrorMessage = () => {
     if (!error) return null;
 
-  
     if (error instanceof AxiosError) {
       const responseData = error.response?.data;
       if (responseData) {
@@ -83,6 +89,31 @@ const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
                   </div>
                 </div>
               )}
+              {showSuccess && (
+                <div className="mb-4 p-4 rounded-md bg-green-50 border border-green-200">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-green-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-green-700">
+                        Registered successfully, Redirecting to the login page
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               <input
                 type="text"
                 placeholder="Enter OTP"
@@ -92,7 +123,7 @@ const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
                   isError ? "border-red-500" : "border-gray-300"
                 } ${isPending ? "bg-gray-50" : "bg-white"}`}
                 maxLength={6}
-                disabled={isPending}
+                disabled={isPending || showSuccess}
               />
             </div>
             <div className="flex justify-end space-x-3">
@@ -100,15 +131,15 @@ const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isPending}
+                disabled={isPending || showSuccess}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={!otp || isPending}
+                disabled={!otp || isPending || showSuccess}
                 className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[100px] flex items-center justify-center ${
-                  !otp || isPending
+                  !otp || isPending || showSuccess
                     ? "bg-blue-300 cursor-not-allowed"
                     : "bg-blue-500 hover:bg-blue-600"
                 }`}
