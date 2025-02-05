@@ -57,10 +57,6 @@ const RegisterComponent: React.FC = () => {
     );
   };
 
-  const handleOtpSubmit = (otp: string) => {
-    console.log('Verifying OTP:', otp);
-    setShowOtpModal(false);
-  };
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
@@ -142,8 +138,9 @@ const RegisterComponent: React.FC = () => {
       {showOtpModal && (
         <OtpModal
           email={watch('email')}
+          name={watch('name')}
+          password={watch('password')}
           onClose={() => setShowOtpModal(false)}
-          onSubmit={handleOtpSubmit}
         />
       )}
     </div>
