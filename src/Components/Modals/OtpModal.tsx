@@ -20,13 +20,12 @@ const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
   const {
     mutate: verifyOtp,
     isPending: isOtpPending,
-    error,
+    error:verifyOtpError,
     isError,
   } = useVerifyOtp();
   const {
     mutate: sendOtp,
-    isPending: isResendOtpPending,
-    error: ResendOtpError,
+    
   } = useOtp();
 
   const navigate = useNavigate();
@@ -53,17 +52,17 @@ const OtpModal = ({ email, name, password, onClose }: OtpModalProps) => {
   };
 
   const getErrorMessage = () => {
-    if (!error) return null;
+    if (!verifyOtpError) return null;
 
-    if (error instanceof AxiosError) {
-      const responseData = error.response?.data;
+    if (verifyOtpError instanceof AxiosError) {
+      const responseData = verifyOtpError.response?.data;
       if (responseData) {
         return responseData.message || "An error occurred";
       }
     }
 
-    if (typeof error === "string") return error;
-    if (error instanceof Error) return error.message;
+    if (typeof verifyOtpError === "string") return verifyOtpError;
+    if (verifyOtpError instanceof Error) return verifyOtpError.message;
     return "An unexpected error occurred. Please try again.";
   };
 
