@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import InputField from "../Common/InputField";
-import { useLogin } from "../../hooks/useLogin";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { COPYRIGHT, COPYRIGHT_URL } from "../../../config";
+import { useOtp } from "../../hooks/useOtp";
+import { registerUser } from "../../redux/userSlice";
+import OtpModal from "../Modals/OtpModal";
 
 interface RegisterFormInputs {
   name: string;
@@ -13,8 +17,14 @@ interface RegisterFormInputs {
 }
 
 const RegisterComponent: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [showOtpModal, setShowOtpModal] = useState(false);
+
   const validationSchema = Yup.object().shape({
-    name: Yup.string().required("Name is required"),
+    name: Yup.string()
+      .min(3, "Password must be at least 3 characters")
+      .required("Name is required"),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
@@ -26,17 +36,27 @@ const RegisterComponent: React.FC = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormInputs>({
     resolver: yupResolver(validationSchema),
     mode: "onChange",
   });
 
-  const { mutate: login, isPending, error } = useLogin();
+  const { mutate: sendOtp, isPending, error } = useOtp();
 
   const onSubmit = (data: RegisterFormInputs) => {
-    login(data);
+    dispatch(registerUser(data));
+    sendOtp(
+      { email: data.email, purpose: "registration" },
+      {
+        onSuccess: () => {
+          setShowOtpModal(true);
+        }
+      }
+    );
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
@@ -80,7 +100,7 @@ const RegisterComponent: React.FC = () => {
                 : "bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400"
             }`}
           >
-            {isPending ? "Logging in..." : "Log In"}
+            {isPending ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
 
@@ -88,18 +108,20 @@ const RegisterComponent: React.FC = () => {
           <p className="text-red-500 text-center my-4">
             {error.response?.data?.message ||
               error.message ||
-              "An error occurred during login"}
+              "An error occurred during sign up"}
           </p>
         )}
 
         <div className="mt-4 text-center flex justify-between">
           <p className="text-sm text-gray-600">
             <span>Already have an account? </span>
-            <a href="/" className="text-blue-500 hover:underline">
-              Log in
-            </a>
+            <button
+              onClick={() => navigate("/")}
+              className="text-blue-500 hover:underline"
+            >
+              Log In
+            </button>
           </p>
-          
         </div>
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
@@ -112,6 +134,15 @@ const RegisterComponent: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {showOtpModal && (
+        <OtpModal
+          email={watch('email')}
+          name={watch('name')}
+          password={watch('password')}
+          onClose={() => setShowOtpModal(false)}
+        />
+      )}
     </div>
   );
 };
