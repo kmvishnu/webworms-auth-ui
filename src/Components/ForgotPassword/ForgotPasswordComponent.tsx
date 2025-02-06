@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
@@ -28,6 +28,10 @@ const ForgotPassword = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [resendCount, setResendCount] = useState(0);
+  const [countdown, setCountdown] = useState(60);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
 
   const emailValidationSchema = Yup.object().shape({
     email: Yup.string()
@@ -120,6 +124,7 @@ const ForgotPassword = () => {
   const onNewPassword = (data: PasswordFormInputs) => {
     setPassword(data.password);
     setStage(3);
+    setCountdown(60);
   };
 
   // Stage 3: Verify OTP
@@ -145,6 +150,40 @@ const ForgotPassword = () => {
       return error.message;
     }
     return "An unexpected error occurred";
+  };
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      setIsResendDisabled(false);
+      return;
+    }
+  
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+  
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  // Add this function to handle resend OTP
+  const handleResendOtp = () => {
+    if (resendCount >= 2) {
+      return; // Maximum attempts reached
+    }
+
+    setResendCount((prev) => prev + 1);
+    setCountdown(60); // Start 60 seconds countdown
+    setIsResendDisabled(true);
+
+    // Call the same API used for sending OTP
+    sendResetEmail(
+      { email, purpose: "forgotPassword" },
+      {
+        onSuccess: () => {
+          // You might want to show a success message
+        },
+      }
+    );
   };
 
   const renderStage = () => {
@@ -234,6 +273,7 @@ const ForgotPassword = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 className="absolute right-3 top-1/2 -translate-y-1/2"
               >
                 <div className="w-5 h-5 text-gray-500">
@@ -410,9 +450,33 @@ const ForgotPassword = () => {
                 {isOtpPending ? "Verifying..." : "Verify OTP"}
               </button>
             </div>
+
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={isResendDisabled || resendCount >= 2}
+                className={`text-blue-600 hover:text-blue-800 text-sm font-medium ${
+                  isResendDisabled || resendCount >= 2
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
+              >
+                {resendCount >= 2
+                  ? "Maximum resend attempts reached"
+                  : isResendDisabled
+                  ? `Resend OTP in ${countdown}s`
+                  : "Resend OTP"}
+              </button>
+              {resendCount > 0 && resendCount < 2 && !isResendDisabled && (
+                <p className="text-gray-500 text-xs mt-1">
+                  {2 - resendCount} attempt{2 - resendCount !== 1 ? "s" : ""}{" "}
+                  remaining
+                </p>
+              )}
+            </div>
           </form>
         );
-
       default:
         return null;
     }
