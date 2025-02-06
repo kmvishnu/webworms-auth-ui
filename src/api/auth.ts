@@ -18,6 +18,12 @@ export interface RegisterRequest {
   otp: string;
 }
 
+export interface verifyForgotPasswordOtpRequest {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
 export interface SendOtpResponse {
   status: string;
   message: string;
@@ -53,5 +59,10 @@ export const sendOtp = async (data: OtpRequest): Promise<SendOtpResponse> => {
 
 export const verifyOtp = async (data: RegisterRequest): Promise<SendOtpResponse> => {
   const response = await api.post<SendOtpResponse>("/verifyOtp", data);
+  return response.data;
+};
+
+export const verifyForgotPasswordOtp = async (data: verifyForgotPasswordOtpRequest): Promise<SendOtpResponse> => {
+  const response = await api.post<SendOtpResponse>("/verifyForgotPasswordOtp", data);
   return response.data;
 };

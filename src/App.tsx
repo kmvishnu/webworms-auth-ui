@@ -6,6 +6,7 @@ import {
 
 import LoginComponent from "./Components/LoginComponent/LoginComponent";
 import RegisterComponent from "./Components/RegisterComponent/RegisterComponent";
+import ForgotPassword from "./Components/ForgotPassword/ForgotPasswordComponent";
 
 function App() {
   return (
@@ -13,6 +14,8 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginComponent />} />
         <Route path="register" element={<RegisterComponent />} />
+        <Route path="register" element={<RegisterComponent />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
       </Routes>
     </Router>
   );

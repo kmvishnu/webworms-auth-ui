@@ -4,6 +4,8 @@ import {
   RegisterRequest,
   sendOtp,
   SendOtpResponse,
+  verifyForgotPasswordOtp,
+  verifyForgotPasswordOtpRequest,
   verifyOtp,
 } from "../api/auth";
 import { AxiosError } from "axios";
@@ -42,3 +44,14 @@ export const useVerifyOtp = () => {
     mutationFn: verifyOtp,
   });
 };
+
+export const useVerifyResetPasswordOtp = () => {
+    return useMutation<
+      SendOtpResponse,
+      AxiosError<otpErrorResponse>,
+      verifyForgotPasswordOtpRequest
+    >({
+      mutationFn: verifyForgotPasswordOtp,
+    });
+  };
+  
