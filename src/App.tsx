@@ -14,7 +14,6 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginComponent />} />
         <Route path="register" element={<RegisterComponent />} />
-        <Route path="register" element={<RegisterComponent />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
       </Routes>
     </Router>
