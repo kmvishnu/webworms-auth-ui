@@ -5,7 +5,7 @@ import {
   sendOtp,
   SendOtpResponse,
   verifyForgotPasswordOtp,
-  verifyForgotPasswordOtpRequest,
+  VerifyForgotPasswordOtpRequest,
   verifyOtp,
 } from "../api/auth";
 import { AxiosError } from "axios";
@@ -49,7 +49,7 @@ export const useVerifyResetPasswordOtp = () => {
     return useMutation<
       SendOtpResponse,
       AxiosError<otpErrorResponse>,
-      verifyForgotPasswordOtpRequest
+      VerifyForgotPasswordOtpRequest
     >({
       mutationFn: verifyForgotPasswordOtp,
     });

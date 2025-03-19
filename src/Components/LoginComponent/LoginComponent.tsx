@@ -4,15 +4,25 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import InputField from "../Common/InputField";
-import { useLogin } from "../../hooks/useLogin";
+import { loginUrl } from "../../api/auth";
 import { COPYRIGHT, COPYRIGHT_URL } from "../../../config";
 
 interface LoginFormInputs {
   email: string;
   password: string;
+  client_id: string;
+  redirect_uri: string;
 }
 
-const LoginComponent: React.FC = () => {
+interface LoginComponentProps {
+  clientId: string;
+  redirectUri: string;
+}
+
+const LoginComponent: React.FC<LoginComponentProps> = ({
+  clientId,
+  redirectUri,
+}) => {
   const navigate = useNavigate();
 
   const validationSchema = Yup.object().shape({
@@ -22,22 +32,53 @@ const LoginComponent: React.FC = () => {
     password: Yup.string()
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
+    client_id: Yup.string().required("Client ID is required"),
+    redirect_uri: Yup.string()
+      .matches(
+        /^https?:\/\/localhost:\d{4,5}(\/callback)?$/,
+        "Redirect URI must be a valid local URL (e.g., http://sampleurl or http://sampleurl/callback)"
+      )
+      .required("Redirect URI is required"),
   });
 
   const {
     register,
-    handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting, isValid },
+    setValue,
+    trigger,
+    getValues,
   } = useForm<LoginFormInputs>({
     resolver: yupResolver(validationSchema),
     mode: "onChange",
+    defaultValues: {
+      client_id: clientId,
+      redirect_uri: redirectUri.endsWith("/callback")
+        ? redirectUri
+        : `${redirectUri.replace(/\/$/, "")}/callback`,
+    },
   });
 
-  const { mutate: login, isPending, error } = useLogin();
+  React.useEffect(() => {
+    const finalRedirectUri = redirectUri.endsWith("/callback")
+      ? redirectUri
+      : `${redirectUri.replace(/\/$/, "")}/callback`;
+    setValue("client_id", clientId);
+    setValue("redirect_uri", finalRedirectUri);
+    console.log("LoginComponent - Props:", { clientId, redirectUri });
+    console.log("LoginComponent - Set redirect_uri:", finalRedirectUri);
+    trigger();
+  }, [clientId, redirectUri, setValue, trigger]);
 
-  const onSubmit = (data: LoginFormInputs) => {
-    login(data);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const formValues = getValues();
+    console.log("Form submitting natively - Values:", formValues);
+    console.log(
+      "Form submitting natively - redirect_uri from input:",
+      e.currentTarget.redirect_uri.value
+    );
   };
+
+  console.log("Form State:", { errors, isValid, isSubmitting });
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
@@ -46,7 +87,13 @@ const LoginComponent: React.FC = () => {
           Login
         </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          action={loginUrl}
+          method="POST"
+          onSubmit={onSubmit}
+          className="space-y-4"
+          noValidate
+        >
           <InputField
             id="email"
             label="Email"
@@ -63,26 +110,20 @@ const LoginComponent: React.FC = () => {
             register={register("password")}
             error={errors.password}
           />
+          <input type="hidden" {...register("client_id")} />
+          <input type="hidden" {...register("redirect_uri")} />
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isSubmitting || !isValid}
             className={`w-full py-3 font-semibold rounded-md focus:outline-none ${
-              isPending
+              isSubmitting || !isValid
                 ? "bg-gray-400 text-gray-800 cursor-not-allowed"
                 : "bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400"
             }`}
           >
-            {isPending ? "Logging in..." : "Log In"}
+            {isSubmitting ? "Logging in..." : "Log In"}
           </button>
         </form>
-
-        {error && (
-          <p className="text-red-500 text-center my-4">
-            {error.response?.data?.message ||
-              error.message ||
-              "An error occurred during login"}
-          </p>
-        )}
 
         <div className="mt-4 text-center flex justify-between">
           <p className="text-sm text-gray-600">
@@ -94,11 +135,6 @@ const LoginComponent: React.FC = () => {
               Sign Up
             </button>
           </p>
-          {/* <p className="text-sm text-gray-600">
-            <a href="#" className="text-blue-500 hover:underline">
-              Forgot Password?
-            </a>
-          </p> */}
           <p className="text-sm text-gray-600">
             <button
               onClick={() => navigate("/forgot-password")}
@@ -110,11 +146,8 @@ const LoginComponent: React.FC = () => {
         </div>
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
-            <a
-              href={`${COPYRIGHT_URL}`}
-              className="text-grey-600 hover:underline"
-            >
-              {`${COPYRIGHT}`}
+            <a href={COPYRIGHT_URL} className="text-grey-600 hover:underline">
+              {COPYRIGHT}
             </a>
           </p>
         </div>

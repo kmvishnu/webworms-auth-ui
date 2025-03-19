@@ -1,21 +1,10 @@
-import {
-  Route,
-  HashRouter as Router,
-  Routes,
-} from "react-router-dom";
-
-import LoginComponent from "./Components/LoginComponent/LoginComponent";
-import RegisterComponent from "./Components/RegisterComponent/RegisterComponent";
-import ForgotPassword from "./Components/ForgotPassword/ForgotPasswordComponent";
+import { BrowserRouter as Router } from "react-router-dom"; // Single Router
+import AppRoutes from "./AppRoutes";
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<LoginComponent />} />
-        <Route path="register" element={<RegisterComponent />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-      </Routes>
+      <AppRoutes />
     </Router>
   );
 }
