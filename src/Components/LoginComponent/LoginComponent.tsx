@@ -35,8 +35,9 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
     client_id: Yup.string().required("Client ID is required"),
     redirect_uri: Yup.string()
       .matches(
-        /^https?:\/\/localhost:\d{4,5}(\/callback)?$/,
-        "Redirect URI must be a valid local URL (e.g., http://sampleurl or http://sampleurl/callback)"
+        // Allow localhost with port OR any valid HTTPS/HTTP URL ending with /callback (optional)
+        /^(https?:\/\/localhost:\d{4,5}(\/callback)?$|https?:\/\/[\w.-]+(:\d+)?\/?([\w\/]*\/)?callback$)/,
+        "Redirect URI must be a valid URL (e.g., http://localhost:3000/callback or https://example.com/callback)"
       )
       .required("Redirect URI is required"),
   });
